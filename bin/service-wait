@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "service_wait"
+
+
+def usage
+  puts "Usage: script.rb host port [timout]"
+end
+
+unless [2,3].include?(ARGV.length)
+  usage
+  exit 1
+end
+
+STDOUT.sync = true
+
+print "Waiting for #{ARGV[0]}:#{ARGV[1]}"
+ServiceWait::Runner.new(ARGV[0], ARGV[1], (ARGV[2] || 20).to_i).wait do |result|
+  case result
+  when :attempt
+    print "."
+  when :timeout
+    print " FAILED"
+    exit 1
+  when :success
+    print " SUCCESS"
+  end
+end
+
+print "\n"
